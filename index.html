@@ -2646,7 +2646,8 @@ window.deleteSalesEmployee=async personId=>{
 
   await loadSalesSetup();
 };
-db.auth.onAuthStateChange(()=>refreshAuth());
+// Внутри обработчика нельзя ждать запросов к базе: supabase-js держит блокировку сессии, и следующие запросы зависают.
+db.auth.onAuthStateChange(()=>setTimeout(refreshAuth,0));
 // Инициализация выполняется после регистрации итоговых обработчиков v4/v5.
 </script>
 <script>
