@@ -1,0 +1,1 @@
+[{"id":1,"name":"Филиал на Ленина","is_active":true,"is_test":false,"is_workshop":false},{"id":2,"name":"ТЦ «Радуга»","is_active":true,"is_test":false,"is_workshop":false},{"id":3,"name":"Мастерская","is_active":true,"is_test":false,"is_workshop":true},{"id":4,"name":"Тестовый филиал","is_active":true,"is_test":true,"is_workshop":false}]
