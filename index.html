@@ -524,6 +524,7 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
       <button id="salesBtn" class="primary tile tile-hero"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="tile-name">Новая продажа</span><span class="tile-hint">Позиции, оплата, клубная карта и чек</span><span class="film-stripe" aria-hidden="true"></span></button>
       <button id="clubBtn" class="secondary tile"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg><span class="tile-name">Клубная карта</span><span class="tile-hint">+5% баллами на следующие сутки, списание до 30% заказа</span></button>
       <button id="salesCatalogPriceBtn" class="secondary tile"><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg><span class="tile-name">Товары и услуги</span><span class="tile-hint">Цены, опт и описание позиций</span></button>
+      <button id="clientsBaseBtn" class="secondary tile"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg><span class="tile-name">База клиентов</span><span class="tile-hint">Клиенты и история их заказов</span></button>
       <button id="templatesBtn" class="secondary tile"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg><span class="tile-name">Шаблоны</span><span class="tile-hint">Готовые ответы клиентам</span></button>
     </div>
   </div>
@@ -6674,6 +6675,108 @@ $('staffSave').onclick=async()=>{
     if(typeof v5Toast==='function')v5Toast(msg);else alert(msg);
   }
   setTimeout(()=>check().catch(()=>{}),5000);setInterval(()=>check().catch(()=>{}),60000);
+})();
+</script>
+<!-- База клиентов (демо, 2026-11-05): ФИО/организация в продаже + история заказов -->
+<style>
+.cl-row{cursor:pointer}.cl-row:hover td{background:var(--surface,#f7f9fc)}
+.cl-order{border:1px solid var(--line,#d7dce5);border-radius:12px;padding:10px 14px;margin:8px 0;background:#fff}
+.cl-order.off{opacity:.55}.cl-order-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.cl-order-head b{font-size:15px}.cl-order-sum{margin-left:auto;font-weight:700}
+.cl-items{margin:6px 0 0;padding-left:18px}.cl-items li{margin:2px 0}
+.cl-stats{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 10px;color:var(--muted,#6b7280)}
+.cl-stats b{color:var(--ink,#111)}
+</style>
+<div class="modal" id="clientsBaseModal"><div class="dialog" style="max-width:900px">
+  <div id="clBaseList"><h2 style="margin-top:0">База клиентов</h2>
+    <div class="status">Сюда попадают продажи, где указано ФИО клиента или организация, и продажи по клубным картам.</div>
+    <div class="field"><input id="clBaseSearch" placeholder="Поиск по ФИО или организации…"></div>
+    <div id="clBaseRows"><div class="status">Загрузка…</div></div></div>
+  <div id="clBaseCard" style="display:none"></div>
+  <div class="actions"><button id="closeClientsBase" class="secondary">Закрыть</button></div>
+</div></div>
+<script>
+(()=>{
+  // Поле клиента в окне продажи
+  $('saleClubEnabled').closest('.sale-loyalty-box').insertAdjacentHTML('beforebegin',`<div class="field" id="saleClientBox"><label>Клиент: ФИО или организация <span class="status" style="display:inline">(необязательно)</span></label><input id="saleClientName" list="saleClientList" autocomplete="off" placeholder="Например: Иванов Иван Иванович или ООО «Ромашка»"><datalist id="saleClientList"></datalist></div>`);
+  let sugT=null;
+  $('saleClientName').addEventListener('input',()=>{clearTimeout(sugT);const q=$('saleClientName').value.trim();if(q.length<2)return;sugT=setTimeout(async()=>{const r=await db.rpc('clients_list',{p_q:q});if(r.error||!r.data)return;$('saleClientList').innerHTML=r.data.slice(0,15).map(c=>`<option value="${esc(c.name)}">`).join('')},250)});
+  const clientName=()=>($('saleClientName')?.value||'').trim().replace(/\s+/g,' ');
+  const resetClient=()=>{if($('saleClientName'))$('saleClientName').value='';if($('saleClientList'))$('saleClientList').innerHTML=''};
+  const baseOpen=openSaleV4;
+  openSaleV4=async function(){resetClient();return baseOpen.apply(this,arguments)};
+  $('salesBtn').onclick=()=>openSaleV4();
+  const baseSel=selectSaleLoyaltyCustomer;
+  selectSaleLoyaltyCustomer=function(c){baseSel.apply(this,arguments);if(c?.customer_name&&!clientName())$('saleClientName').value=c.customer_name};
+
+  // Имя клиента уходит в продажу: обычная продажа (и офлайн-очередь) — через sales_create_sale_v7
+  const baseKq=kqCall;
+  kqCall=function(fn,args){
+    if(fn==='sales_create_sale_v6'&&args&&'p_client_name' in args){
+      if(args.p_client_name)return baseKq('sales_create_sale_v7',args);
+      const a={...args};delete a.p_client_name;return baseKq(fn,a);
+    }
+    return baseKq(fn,args);
+  };
+  const inner=db.rpc;
+  db.rpc=(fn,args,opts)=>{
+    if(fn!=='sales_create_sale')return inner(fn,args,opts);
+    const name=clientName();
+    if(!name)return inner(fn,args,opts);
+    if(pickupRpcOverride){
+      const shift=args?.p_shift_id;
+      return Promise.resolve(inner(fn,args,opts)).then(r=>{
+        if(!r?.error&&pickupLastResult?.kind==='pay'&&r?.data){Promise.resolve(inner('sales_attach_client',{p_shift_id:shift,p_order_number:Number(r.data),p_name:name})).catch(()=>{})}
+        if(!r?.error)resetClient();
+        return r;
+      });
+    }
+    return Promise.resolve(inner(fn,{...args,p_client_name:name},opts)).then(r=>{if(!r?.error)resetClient();return r});
+  };
+
+  // Раздел «База клиентов»
+  const fmtDate=d=>new Date(d).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const qty=v=>{const n=Number(v);return Number.isInteger(n)?String(n):String(n).replace('.',',')};
+  const statusLbl={returned:'Возврат',cancelled:'Отменена',deleted:'Удалена'};
+  let listT=null,current=null;
+  async function loadList(){
+    const q=$('clBaseSearch').value.trim();
+    const r=await db.rpc('clients_list',{p_q:q||null});
+    if(r.error){$('clBaseRows').innerHTML=`<div class="status">Ошибка: ${esc(r.error.message)}</div>`;return}
+    const rows=r.data||[];
+    $('clBaseRows').innerHTML=rows.length?`<table class="customer-table"><thead><tr><th>Клиент</th><th>Заказов</th><th>Сумма</th><th>Последний заказ</th></tr></thead><tbody>${rows.map(c=>`<tr class="cl-row" onclick="clOpenClient(${c.id})"><td><b>${esc(c.name)}</b></td><td>${c.orders}</td><td>${salesMoney(c.total)}</td><td>${c.last_at?fmtDate(c.last_at):'—'}</td></tr>`).join('')}</tbody></table>`:'<div class="status">Клиентов не найдено.</div>';
+  }
+  window.clOpenClient=async id=>{
+    const c=(await db.rpc('clients_list',{p_q:null})).data?.find(x=>Number(x.id)===Number(id));
+    const r=await db.rpc('client_history',{p_client_id:id});
+    if(r.error){alert('Не удалось загрузить историю: '+r.error.message);return}
+    current={id,name:c?.name||''};
+    const orders=r.data||[];
+    $('clBaseList').style.display='none';$('clBaseCard').style.display='block';
+    $('clBaseCard').innerHTML=`<button class="secondary" onclick="clBack()">← Все клиенты</button>
+      <h2 style="margin:12px 0 0">${esc(current.name)}</h2>
+      <div class="cl-stats"><span>Заказов: <b>${c?.orders??orders.length}</b></span><span>Сумма: <b>${salesMoney(c?.total||0)}</b></span><span>Последний: <b>${c?.last_at?fmtDate(c.last_at):'—'}</b></span></div>
+      ${isAdmin?`<div class="actions" style="justify-content:flex-start;margin:0 0 6px"><button class="secondary" onclick="clRename()">✏️ Исправить имя</button></div>`:''}
+      <h3>История заказов</h3>
+      ${orders.length?orders.map(o=>{const off=o.status&&o.status!=='completed';return `<div class="cl-order${off?' off':''}"><div class="cl-order-head"><b>${fmtDate(o.created_at)}</b><span>Заказ №${esc(o.order_number??o.id)}</span><span>${esc(o.branch||'')}</span>${o.employee?`<span>Кассир: ${esc(o.employee)}</span>`:''}${off?`<span style="color:#c62828;font-weight:600">${statusLbl[o.status]||esc(o.status)}</span>`:''}<span class="cl-order-sum">${salesMoney(o.total)}</span></div><ul class="cl-items">${(o.items||[]).map(i=>`<li>${esc(i.name)} × ${qty(i.qty)} — ${salesMoney(i.sum)}</li>`).join('')}</ul>${o.comment?`<div class="status">Комментарий: ${esc(o.comment)}</div>`:''}${isAdmin?`<div style="text-align:right"><button class="secondary" style="padding:4px 10px;font-size:12px" onclick="clDetach(${o.id})">Убрать из истории клиента</button></div>`:''}</div>`}).join(''):'<div class="status">Заказов нет.</div>'}`;
+  };
+  window.clBack=()=>{current=null;$('clBaseCard').style.display='none';$('clBaseList').style.display='block';loadList()};
+  window.clRename=async()=>{
+    if(!current)return;const n=prompt('ФИО или название организации. Если такой клиент уже есть, заказы объединятся.',current.name);
+    if(n==null||!n.trim())return;
+    const r=await db.rpc('clients_rename',{p_client_id:current.id,p_name:n.trim()});
+    if(r.error){alert('Ошибка: '+r.error.message);return}
+    clOpenClient(r.data);
+  };
+  window.clDetach=async saleId=>{
+    if(!confirm('Убрать этот заказ из истории клиента? Сама продажа останется в отчётах.'))return;
+    const r=await db.rpc('sales_detach_client',{p_sale_id:saleId});
+    if(r.error){alert('Ошибка: '+r.error.message);return}
+    if(current)clOpenClient(current.id);
+  };
+  $('clientsBaseBtn').onclick=()=>{$('clBaseSearch').value='';clBack();open('clientsBaseModal')};
+  $('clBaseSearch').oninput=()=>{clearTimeout(listT);listT=setTimeout(loadList,250)};
+  $('closeClientsBase').onclick=()=>close('clientsBaseModal');
 })();
 </script>
 </body>
