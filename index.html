@@ -6930,5 +6930,101 @@ $('staffSave').onclick=async()=>{
   };
 })();
 </script>
+<!-- Обновления сайта (демо, 2026-11-05): разработчик предлагает, админ клиента соглашается или отказывается -->
+<style>
+.su-pop .su-img,.su-card .su-img{max-width:100%;border-radius:10px;border:1px solid var(--line,#d7dce5);margin:8px 0;display:block}
+.su-price{font-size:22px;font-weight:800;margin:8px 0}.su-free{color:#2e7d32}
+.su-card{border:1px solid var(--line,#d7dce5);border-radius:12px;padding:12px 14px;margin:8px 0;background:#fff}
+.su-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}.su-head .su-st{margin-left:auto;font-weight:600}
+.su-st.offered{color:#b26a00}.su-st.accepted{color:#1565c0}.su-st.installed{color:#2e7d32}.su-st.declined,.su-st.withdrawn{color:#888}
+.su-badge{display:inline-block;min-width:18px;padding:0 6px;border-radius:9px;background:#e53935;color:#fff;font-size:12px;margin-left:4px}
+</style>
+<div class="modal" id="suPopModal"><div class="dialog su-pop" style="max-width:640px">
+  <div class="kicker">🚀 Вышло обновление</div><div id="suPopBody"></div>
+  <div class="actions"><button id="suPopLater" class="secondary">Позже</button><button id="suPopNo" class="secondary">Отказаться</button><button id="suPopYes" class="primary">Согласен</button></div>
+</div></div>
+<div class="modal" id="suListModal"><div class="dialog" style="max-width:860px">
+  <h2 style="margin-top:0">Обновления сайта</h2>
+  <div class="status" id="suListHint"></div>
+  <div id="suDevForm" style="display:none" class="su-card"><h3 style="margin-top:0" id="suFormTitle">Новое обновление</h3><input type="hidden" id="suEditId">
+    <div class="field"><label>Название *</label><input id="suTitle" placeholder="Например: Напоминание клиентам о готовности заказа"></div>
+    <div class="field"><label>Описание / презентация</label><textarea id="suDesc" rows="5" placeholder="Что появится и чем это поможет"></textarea></div>
+    <div class="row"><div class="field"><label>Цена, ₽ (0 — бесплатно)</label><input id="suPrice" type="number" min="0" step="1" value="0"></div><div class="field"><label>Срок установки</label><input id="suEta" placeholder="Например: 3 рабочих дня"></div></div>
+    <div class="field"><label>Скриншоты</label><input id="suFiles" type="file" accept="image/*" multiple><div id="suImgs" class="status"></div></div>
+    <div class="actions" style="justify-content:flex-start"><button id="suSave" class="primary">Отправить клиенту</button><button id="suCancelEdit" class="secondary" style="display:none">Отменить правку</button><span id="suFormStatus" class="status"></span></div>
+  </div>
+  <div id="suRows"><div class="status">Загрузка…</div></div>
+  <div class="actions"><button id="closeSuList" class="secondary">Закрыть</button></div>
+</div></div>
+<script>
+(()=>{
+  const ST={offered:'Ждёт ответа',accepted:'Согласовано — в работе',installed:'Установлено',declined:'Отказ',withdrawn:'Снято'};
+  let isDev=false,rows=[],popQueue=[],popCur=null,editImgs=[];
+  const seenKey='suLater_'; const later=id=>{try{return sessionStorage.getItem(seenKey+id)==='1'}catch(e){return false}};
+  const fmt=d=>d?new Date(d).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+  const price=v=>Number(v)>0?`<span class="su-price">${salesMoney(v)}</span>`:`<span class="su-price su-free">Бесплатно</span>`;
+  const descHtml=u=>`${u.description?`<div style="white-space:pre-wrap">${esc(u.description)}</div>`:''}${(u.images||[]).map(s=>`<img class="su-img" src="${esc(s)}" alt="">`).join('')}`;
+  document.getElementById('refreshBtn').insertAdjacentHTML('beforebegin','<button id="suBtn" class="secondary" style="display:none">Обновления<span id="suBadge"></span></button>');
+  async function load(){
+    const r=await db.rpc('site_updates_list');rows=r.error?[]:(r.data||[]);
+    const pend=rows.filter(u=>u.status==='offered').length;
+    $('suBadge').innerHTML=(!isDev&&pend)?`<span class="su-badge">${pend}</span>`:'';
+    return rows;
+  }
+  async function sync(){
+    let dev=false;
+    if(isAdmin){const r=await db.rpc('is_developer');dev=!r.error&&!!r.data}
+    isDev=dev;$('suBtn').style.display=isAdmin?'inline-block':'none';
+    if(!isAdmin)return;
+    await load();
+    if(!isDev){popQueue=rows.filter(u=>u.status==='offered'&&!later(u.id));showNext()}
+  }
+  function showNext(){
+    if($('suPopModal').classList.contains('show'))return;
+    popCur=popQueue.shift();if(!popCur)return;
+    $('suPopBody').innerHTML=`<h2 style="margin:4px 0">${esc(popCur.title)}</h2>${price(popCur.price)}${popCur.eta?`<div class="status">Срок установки: ${esc(popCur.eta)}</div>`:''}${descHtml(popCur)}<div class="status" style="margin-top:8px">«Согласен» — заказ обновления${Number(popCur.price)>0?' с оплатой переводом':''}. «Отказаться» — уведомление пропадёт, сайт продолжит работать как сейчас.</div>`;
+    open('suPopModal');
+  }
+  async function decide(accept){
+    if(!popCur)return;
+    if(accept&&Number(popCur.price)>0&&!confirm(`Заказать обновление «${popCur.title}» за ${salesMoney(popCur.price)}?`))return;
+    const r=await db.rpc('site_update_decide',{p_id:popCur.id,p_accept:accept});
+    if(r.error){alert('Ошибка: '+r.error.message);return}
+    close('suPopModal');v5Toast?.(accept?'Спасибо! Разработчик получил заявку и свяжется с вами.':'Уведомление скрыто.');
+    await load();showNext();
+  }
+  $('suPopYes').onclick=()=>decide(true);$('suPopNo').onclick=()=>decide(false);
+  $('suPopLater').onclick=()=>{try{sessionStorage.setItem(seenKey+popCur.id,'1')}catch(e){}close('suPopModal');showNext()};
+  function renderList(){
+    $('suListHint').textContent=isDev?'Вы вошли как разработчик. Новое обновление сразу появится у администратора клиента.':'Здесь все обновления, которые предлагал разработчик, и ваши ответы.';
+    $('suDevForm').style.display=isDev?'block':'none';
+    $('suRows').innerHTML=rows.length?rows.map(u=>`<div class="su-card"><div class="su-head"><b>${esc(u.title)}</b><span>${Number(u.price)>0?salesMoney(u.price):'Бесплатно'}</span>${u.eta?`<span class="status">${esc(u.eta)}</span>`:''}<span class="su-st ${u.status}">${ST[u.status]||u.status}</span></div>
+      <div class="status">Предложено ${fmt(u.created_at)}${u.decided_at?` · ответ ${fmt(u.decided_at)}${u.decided_by_name?' ('+esc(u.decided_by_name)+')':''}`:''}${u.installed_at?` · установлено ${fmt(u.installed_at)}`:''}</div>${descHtml(u)}
+      <div class="actions" style="justify-content:flex-end;margin:6px 0 0">${!isDev&&u.status==='offered'?`<button class="secondary" onclick="suAnswer(${u.id},false)">Отказаться</button><button class="primary" onclick="suAnswer(${u.id},true)">Согласен</button>`:''}${isDev&&u.status==='offered'?`<button class="secondary" onclick="suEdit(${u.id})">✏️ Изменить</button><button class="danger small" onclick="suStatus(${u.id},'withdrawn')">Снять</button>`:''}${isDev&&u.status==='accepted'?`<button class="primary" onclick="suStatus(${u.id},'installed')">✓ Установлено</button>`:''}${isDev&&(u.status==='declined'||u.status==='withdrawn')?`<button class="secondary" onclick="suStatus(${u.id},'offered')">Предложить снова</button>`:''}</div></div>`).join(''):'<div class="status">Обновлений пока нет.</div>';
+  }
+  window.suAnswer=async(id,accept)=>{popCur=rows.find(u=>Number(u.id)===Number(id));await decide(accept);renderList()};
+  window.suStatus=async(id,st)=>{const r=await db.rpc('site_update_set_status',{p_id:id,p_status:st});if(r.error){alert('Ошибка: '+r.error.message);return}await load();renderList()};
+  const resetForm=()=>{$('suEditId').value='';$('suTitle').value='';$('suDesc').value='';$('suPrice').value='0';$('suEta').value='';$('suFiles').value='';editImgs=[];$('suImgs').textContent='';$('suFormTitle').textContent='Новое обновление';$('suSave').textContent='Отправить клиенту';$('suCancelEdit').style.display='none';$('suFormStatus').textContent=''};
+  window.suEdit=id=>{const u=rows.find(x=>Number(x.id)===Number(id));if(!u)return;$('suEditId').value=u.id;$('suTitle').value=u.title;$('suDesc').value=u.description||'';$('suPrice').value=Number(u.price);$('suEta').value=u.eta||'';editImgs=[...(u.images||[])];$('suImgs').textContent=editImgs.length?`Уже прикреплено: ${editImgs.length} (новые файлы заменят их)`:'';$('suFormTitle').textContent='Изменить обновление';$('suSave').textContent='Сохранить';$('suCancelEdit').style.display='inline-block';$('suDevForm').scrollIntoView({behavior:'smooth'})};
+  $('suCancelEdit').onclick=resetForm;
+  $('suSave').onclick=async()=>{
+    const title=$('suTitle').value.trim();if(!title){$('suFormStatus').textContent='Укажите название.';return}
+    $('suSave').disabled=true;$('suFormStatus').textContent='Сохраняю…';
+    try{
+      let imgs=editImgs;const files=[...($('suFiles').files||[])];
+      if(files.length){imgs=[];for(const f of files){const path=`updates/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${(f.name.split('.').pop()||'png').toLowerCase()}`;const up=await db.storage.from('product-images').upload(path,f,{upsert:false});if(up.error)throw up.error;imgs.push(db.storage.from('product-images').getPublicUrl(path).data.publicUrl)}}
+      const r=await db.rpc('site_update_save',{p_id:$('suEditId').value?Number($('suEditId').value):null,p_title:title,p_description:$('suDesc').value,p_images:imgs,p_price:Number($('suPrice').value)||0,p_eta:$('suEta').value});
+      if(r.error)throw r.error;
+      resetForm();$('suFormStatus').textContent='Готово, клиент увидит обновление при следующем входе.';await load();renderList();
+    }catch(e){$('suFormStatus').textContent='Ошибка: '+(e.message||e)}finally{$('suSave').disabled=false}
+  };
+  $('suBtn').onclick=async()=>{await load();renderList();open('suListModal')};
+  $('closeSuList').onclick=()=>close('suListModal');
+  const baseAuth=refreshAuth;
+  refreshAuth=async function(){const r=await baseAuth.apply(this,arguments);sync().catch(()=>{});return r};
+  setTimeout(()=>sync().catch(()=>{}),2500);
+  setInterval(()=>{if(isAdmin&&!isDev)load().then(()=>{popQueue=rows.filter(u=>u.status==='offered'&&!later(u.id)&&u.id!==popCur?.id);showNext()}).catch(()=>{})},10*60*1000);
+})();
+</script>
 </body>
 </html>
