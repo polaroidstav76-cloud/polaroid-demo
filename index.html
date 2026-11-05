@@ -6784,5 +6784,100 @@ $('staffSave').onclick=async()=>{
   $('closeClientsBase').onclick=()=>close('clientsBaseModal');
 })();
 </script>
+<!-- Предварительные расчёты (демо, 2026-11-05): расчёт без оплаты, потом пробивается одной кнопкой -->
+<style>
+.est-card{border:1px solid var(--line,#d7dce5);border-radius:12px;padding:12px 14px;margin:8px 0;background:#fff}
+.est-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}.est-head .est-sum{margin-left:auto;font-weight:700;font-size:16px}
+.est-items{margin:6px 0;padding-left:18px}.est-items li{margin:2px 0}
+.est-tabs{display:flex;gap:8px;margin:8px 0}.est-tabs button[aria-pressed="true"]{background:var(--ink,#111);color:#fff}
+</style>
+<div class="modal" id="estimatesModal"><div class="dialog" style="max-width:900px">
+  <h2 style="margin-top:0">Предварительные расчёты</h2>
+  <div class="status">Расчёты, которые клиент ещё не оплатил. Когда клиент вернётся, нажмите «Пробить»: позиции подставятся в продажу, останется выбрать способ оплаты.</div>
+  <div class="est-tabs"><button class="secondary" id="estTabOpen" aria-pressed="true">Ждут клиента</button><button class="secondary" id="estTabPaid" aria-pressed="false">Пробитые</button><button class="secondary" id="estTabCancelled" aria-pressed="false">Отменённые</button></div>
+  <div class="field"><input id="estSearch" placeholder="Поиск по клиенту или позиции…"></div>
+  <div id="estRows"><div class="status">Загрузка…</div></div>
+  <div class="actions"><button id="closeEstimates" class="secondary">Закрыть</button></div>
+</div></div>
+<script>
+(()=>{
+  const sel=$('salePayment');
+  const addOpt=()=>{if(!sel.querySelector('option[value="estimate"]'))sel.insertAdjacentHTML('beforeend','<option value="estimate">📝 Предварительный расчёт (без оплаты)</option>')};
+  addOpt();
+  const setEstOpt=on=>{addOpt();const o=sel.querySelector('option[value="estimate"]');o.hidden=!on;o.disabled=!on};
+  $('saleItems').insertAdjacentHTML('beforebegin','<div id="saleEstimateBanner" class="v5-box info" style="display:none"></div>');
+  window.saleEstimate=null;
+  let estimateMode=false,estTab='open',estRowsCache=[];
+  $('clientsBaseBtn').insertAdjacentHTML('afterend','<button id="estimatesBtn" class="secondary tile"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="tile-name">Предварительные расчёты</span><span class="tile-hint">Посчитали заказ, клиент оплатит позже</span></button>');
+
+  const baseOpen=openSaleV4;
+  openSaleV4=async function(){saleEstimate=null;$('saleEstimateBanner').style.display='none';const r=await baseOpen.apply(this,arguments);addOpt();setEstOpt(true);return r};
+  $('salesBtn').onclick=()=>openSaleV4();
+
+  const inner=db.rpc;
+  db.rpc=(fn,args,opts)=>{
+    if(fn!=='sales_create_sale')return inner(fn,args,opts);
+    if(estimateMode){
+      estimateMode=false;
+      return Promise.resolve(v5Rpc('estimate_save',{p_shift_id:args.p_shift_id,p_employee_id:args.p_employee_id,p_items:args.p_items,p_discount_percent:args.p_discount_percent||0,p_comment:args.p_comment,p_client_name:($('saleClientName')?.value||'').trim()||args.p_loyalty_name||null,p_loyalty_customer_id:args.p_loyalty_customer_id||null})).then(r=>{if(!r.error){window.estLastSaved=r.data;if($('saleClientName'))$('saleClientName').value=''}return r});
+    }
+    const est=(!pickupRpcOverride&&saleEstimate)?saleEstimate:null;
+    return Promise.resolve(inner(fn,args,opts)).then(r=>{
+      if(est&&!r?.error&&r?.data!=null)Promise.resolve(v5Rpc('estimate_mark_paid',{p_id:est.id,p_order_number:Number(r.data)})).catch(()=>{});
+      return r;
+    });
+  };
+
+  const prevSave=$('saveSale').onclick;
+  $('saveSale').onclick=async()=>{
+    if($('saveSale').disabled)return;
+    const pay=$('salePayment').value;
+    if(pay!=='estimate')return prevSave();
+    if(saleEstimate){$('saleStatus').textContent='Это уже предварительный расчёт. Выберите, как клиент платит.';return}
+    if(salePointsUsed()>0){$('saleStatus').textContent='В предварительном расчёте баллы списать нельзя. Спишите их, когда клиент будет оплачивать.';return}
+    if(!($('saleClientName')?.value||'').trim()&&!($('saleClubEnabled').checked&&saleLoyaltyCustomer)){$('saleStatus').textContent='Укажите клиента: ФИО или организацию, чтобы потом найти расчёт.';$('saleClientName')?.focus();return}
+    if($('saleCkOn')?.checked){$('saleCkOn').checked=false;$('saleCkOn').onchange?.()}
+    window.estLastSaved=null;estimateMode=true;
+    try{await prevSave()}finally{estimateMode=false}
+    if(window.estLastSaved){v5Toast(`Предварительный расчёт №${window.estLastSaved} сохранён. Он в «Предварительные расчёты», в отчёт не попал.`);window.estLastSaved=null}
+  };
+
+  const fmt=d=>new Date(d).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const q3=(v,u)=>{const n=Number(v);return (Number.isInteger(n)?String(n):String(n).replace('.',','))+(u==='m'?' м':'')};
+  async function loadEst(){
+    const r=await db.rpc('estimates_list',{p_status:estTab});
+    if(r.error){$('estRows').innerHTML=`<div class="status">Ошибка: ${esc(r.error.message)}</div>`;return}
+    estRowsCache=r.data||[];renderEst();
+  }
+  function renderEst(){
+    const q=($('estSearch').value||'').trim().toLowerCase();
+    const rows=estRowsCache.filter(e=>!q||(e.client_name||'').toLowerCase().includes(q)||(e.items||[]).some(i=>(i.name||'').toLowerCase().includes(q)));
+    $('estRows').innerHTML=rows.length?rows.map(e=>`<div class="est-card"><div class="est-head"><b>№${e.id} · ${esc(e.client_name||'Без имени')}</b><span>${fmt(e.created_at)}</span><span>${esc(e.branch||'')}</span>${e.employee?`<span>Посчитал(а): ${esc(e.employee)}</span>`:''}<span class="est-sum">${salesMoney(e.total)}</span></div><ul class="est-items">${(e.items||[]).map(i=>`<li>${esc(i.name)} × ${q3(i.quantity,i.unit)} — ${salesMoney(i.line_total)}</li>`).join('')}</ul>${Number(e.discount_percent)>0?`<div class="status">Скидка ${e.discount_percent}%</div>`:''}${e.comment?`<div class="status">Комментарий: ${esc(e.comment)}</div>`:''}${e.status==='open'?`<div class="actions" style="justify-content:flex-end;margin:6px 0 0"><button class="danger small" onclick="estCancel(${e.id})">Отменить</button><button class="primary" onclick="estPay(${e.id})">💳 Пробить</button></div>`:e.status==='paid'?`<div class="status">Пробит ${e.paid_at?fmt(e.paid_at):''}${e.paid_order_number?` · продажа №${e.paid_order_number}`:''}</div>`:''}</div>`).join(''):'<div class="status">Расчётов нет.</div>';
+  }
+  function setTab(t){estTab=t;[['open','estTabOpen'],['paid','estTabPaid'],['cancelled','estTabCancelled']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',k===t?'true':'false'));loadEst()}
+  $('estTabOpen').onclick=()=>setTab('open');$('estTabPaid').onclick=()=>setTab('paid');$('estTabCancelled').onclick=()=>setTab('cancelled');
+  $('estSearch').oninput=renderEst;
+  $('estimatesBtn').onclick=()=>{$('estSearch').value='';setTab('open');open('estimatesModal')};
+  $('closeEstimates').onclick=()=>close('estimatesModal');
+  window.estCancel=async id=>{if(!confirm('Отменить предварительный расчёт №'+id+'? Клиент не придёт или передумал.'))return;const r=await db.rpc('estimate_cancel',{p_id:id});if(r.error){alert('Ошибка: '+r.error.message);return}loadEst()};
+  window.estPay=async id=>{
+    const e=estRowsCache.find(x=>Number(x.id)===Number(id));if(!e)return;
+    if(!salesSession?.shiftId){alert('Сначала откройте смену: оплата попадёт в отчёт текущей смены.');close('estimatesModal');await openSalesWorkspace();return}
+    if($('saleModal').classList.contains('show')&&saleDraft.length&&!confirm('Корзина текущей продажи будет заменена расчётом №'+id+'. Продолжить?'))return;
+    close('estimatesModal');
+    await openSaleV4();
+    if(!$('saleModal').classList.contains('show'))return;
+    saleEstimate=e;
+    saleDraft=(e.items||[]).map(i=>({catalogId:Number(i.catalog_id),quantity:Number(i.quantity),unitPrice:Number(i.unit_price),...(i.variant_material_id?{variantId:Number(i.variant_material_id),vt:-1}:{})}));
+    $('saleDiscountPercent').value=String(Number(e.discount_percent||0));
+    $('saleComment').value=e.comment||'';
+    if($('saleClientName'))$('saleClientName').value=e.client_name||'';
+    setEstOpt(false);setPickupOptionAvailable(false);$('salePayment').value='';$('salePayment').onchange?.();
+    $('saleEstimateBanner').innerHTML=`<b>Предварительный расчёт №${e.id} от ${fmt(e.created_at)}</b> · ${esc(e.client_name||'')}<br>Сумма по расчёту ${salesMoney(e.total)}. Проверьте позиции, выберите способ оплаты и нажмите «Оформить». Продажа попадёт в «Продажи за сегодня».`;
+    $('saleEstimateBanner').style.display='block';
+    renderSaleDraft();
+  };
+})();
+</script>
 </body>
 </html>
