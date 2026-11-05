@@ -554,11 +554,11 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
     <div class="calc-head">
       <div>
         <h2 id="calcTitle">Расчёт площади</h2>
-        <div class="status">Размер указывается в сантиметрах. Цена вводится за 1 м² и одновременно является минимальной стоимостью заказа.</div>
+        <div class="status">Размер указывается в миллиметрах. Цена вводится за 1 м² и одновременно является минимальной стоимостью заказа.</div>
       </div>
     </div>
     <div class="row calc-row">
-      <div class="field"><label for="calcSize">Размер, см</label><input id="calcSize" placeholder="Например: 132×80" inputmode="text"></div>
+      <div class="field"><label for="calcSize">Размер, мм</label><input id="calcSize" placeholder="Например: 1320×800" inputmode="text"></div>
       <div class="field"><label for="calcPrice">Цена материала, ₽/м²</label><input id="calcPrice" type="number" min="0" step="0.01" placeholder="Например: 650"></div>
     </div>
     <div class="check-row"><label><input id="calcGrommets" type="checkbox"> Люверсы</label></div>
@@ -570,8 +570,8 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
     <h2 id="sheetCalcTitle">Калькулятор карточек на листе</h2>
     <div class="status">Материал входит в стоимость печати. Сотрудник выбирает готовый материал, а цена берётся из правила печати.</div>
     <div class="row calc-row">
-      <div class="field"><label for="cardSize">Размер карточки, см</label><input id="cardSize" placeholder="Например: 5×7" inputmode="text"></div>
-      <div class="field"><label for="sheetSize">Размер листа, см</label><input id="sheetSize" placeholder="Например: 30×42" inputmode="text"></div>
+      <div class="field"><label for="cardSize">Размер карточки, мм</label><input id="cardSize" placeholder="Например: 50×70" inputmode="text"></div>
+      <div class="field"><label for="sheetSize">Размер листа, мм</label><input id="sheetSize" placeholder="Например: 300×420" inputmode="text"></div>
     </div>
     <div class="row calc-row">
       <div class="field"><label for="cardQty">Количество карточек, шт.</label><input id="cardQty" type="number" min="1" step="1" placeholder="Например: 1000"></div>
@@ -627,7 +627,7 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
 
   <section class="calc-card calc-pane" role="tabpanel" aria-labelledby="plotterCalcTitle" hidden>
     <h2 id="plotterCalcTitle">Плоттерная резка</h2>
-    <div class="status">Цена берётся из «Цены листов» по цвету плёнки и размерной ступени: до 10×15, до 15×21, до 21×28, до 28×40, до 28×60, до 28×100 см. Изделие можно повернуть, оно попадает в самую маленькую подходящую ступень.</div>
+    <div class="status">Цена берётся из «Цены листов» по цвету плёнки и размерной ступени: до 100×150, до 150×210, до 210×280, до 280×400, до 280×600, до 280×1000 мм. Изделие можно повернуть, оно попадает в самую маленькую подходящую ступень.</div>
     <div class="row calc-row">
       <div class="field"><label for="plotterColor">Цвет плёнки</label><select id="plotterColor"><option value="">Выберите цвет</option></select></div>
     </div>
@@ -722,7 +722,7 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
   <div class="status">Материал здесь является частью готовой цены печати. Например: глянец 30×42 — 190 ₽/лист. Дополнительно цена глянца к печати НЕ прибавляется.</div>
   <div class="row">
     <div class="field"><label>Материал</label><input id="prMaterial" placeholder="Глянец"></div>
-    <div class="field"><label>Размер листа, см</label><input id="prSheetSize" placeholder="30×42"></div>
+    <div class="field"><label>Размер листа, мм</label><input id="prSheetSize" placeholder="300×420"></div>
   </div>
   <div class="row">
     <div class="field"><label>Печать</label><select id="prSides"><option value="single">Односторонняя</option><option value="double">Двусторонняя</option></select></div>
@@ -738,7 +738,7 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
   <div class="status">Ламинация задаётся отдельным правилом: материал, размер листа, порог тиража и цена розницы/опта. Стоимость считается за лист.</div>
   <div class="row">
     <div class="field"><label>Материал ламинации</label><input id="lrMaterial" placeholder="Сахарная ламинация"></div>
-    <div class="field"><label>Размер листа, см</label><input id="lrSheetSize" placeholder="30×42"></div>
+    <div class="field"><label>Размер листа, мм</label><input id="lrSheetSize" placeholder="300×420"></div>
   </div>
   <div class="row">
     <div class="field"><label>Ламинация</label><select id="lrSides"><option value="single">Односторонняя</option><option value="double">Двусторонняя</option></select></div>
@@ -759,15 +759,15 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
   </div>
   <div class="row">
     <div class="field"><label>Нанесение 1</label><select id="shirtRulePrint1"><option value="dtf">ДТФ</option><option value="film">Плёнка</option></select></div>
-    <div class="field"><label>Размер 1</label><select id="shirtRuleSize1"><option value="1">1 — больше 15×21 до 28×38 см</option><option value="0.5">0,5 — до 15×21 см</option></select></div>
+    <div class="field"><label>Размер 1</label><select id="shirtRuleSize1"><option value="1">1 — больше 150×210 до 280×380 мм</option><option value="0.5">0,5 — до 150×210 мм</option></select></div>
   </div>
   <div class="row">
     <div class="field"><label>Нанесение 2 (необязательно)</label><select id="shirtRulePrint2"><option value="">— нет —</option><option value="dtf">ДТФ</option><option value="film">Плёнка</option></select></div>
-    <div class="field"><label>Размер 2</label><select id="shirtRuleSize2"><option value="1">1 — больше 15×21 до 28×38 см</option><option value="0.5">0,5 — до 15×21 см</option></select></div>
+    <div class="field"><label>Размер 2</label><select id="shirtRuleSize2"><option value="1">1 — больше 150×210 до 280×380 мм</option><option value="0.5">0,5 — до 150×210 мм</option></select></div>
   </div>
   <div class="row">
     <div class="field"><label>Нанесение 3 (необязательно)</label><select id="shirtRulePrint3"><option value="">— нет —</option><option value="dtf">ДТФ</option><option value="film">Плёнка</option></select></div>
-    <div class="field"><label>Размер 3</label><select id="shirtRuleSize3"><option value="1">1 — больше 15×21 до 28×38 см</option><option value="0.5">0,5 — до 15×21 см</option></select></div>
+    <div class="field"><label>Размер 3</label><select id="shirtRuleSize3"><option value="1">1 — больше 150×210 до 280×380 мм</option><option value="0.5">0,5 — до 150×210 мм</option></select></div>
   </div>
   <div class="row">
     <div class="field"><label>Розничная цена комбинации, ₽</label><input id="shirtRuleRetail" type="number" min="0" step="0.01"></div>
@@ -779,7 +779,7 @@ body.has-task-banner .modal{padding-bottom:calc(var(--task-banner-h,0px) + 10px)
   <h3>Услуги: «Разные картинки» и «Резка»</h3>
   <div class="status">Стоимость услуги считается за лист. Для каждой услуги можно задать свои пороги и цены розницы/опта.</div>
   <div class="row">
-    <div class="field"><label>Размер листа, см</label><input id="srSheetSize" placeholder="30×42"></div>
+    <div class="field"><label>Размер листа, мм</label><input id="srSheetSize" placeholder="300×420"></div>
     <div class="field"><label>Услуга</label><select id="srService"><option value="different_images">Разные картинки</option><option value="cutting">Резка листов</option></select></div>
   </div>
   <div class="row">
@@ -1196,7 +1196,7 @@ $('clubRedeemCalcBtn').onclick=()=>{const amount=Number($('clubRedeemCalcAmount'
 function parseCalcSize(value){
   const m=String(value||'').trim().replace(/,/g,'.').match(/^(\d+(?:\.\d+)?)\s*(?:x|х|×|\*)\s*(\d+(?:\.\d+)?)/i);
   if(!m) return null;
-  const widthCm=Number(m[1]), heightCm=Number(m[2]);
+  const widthCm=Number(m[1])/10, heightCm=Number(m[2])/10;
   if(!(widthCm>0) || !(heightCm>0) || !Number.isFinite(widthCm) || !Number.isFinite(heightCm)) return null;
   return {widthCm,heightCm};
 }
@@ -1204,7 +1204,7 @@ function money(v){return new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,
 $('calcBtn').onclick=()=>{
   const size=parseCalcSize($('calcSize').value);
   const price=Number(String($('calcPrice').value).replace(',','.'));
-  if(!size){$('calcResult').innerHTML='<b>Введите размер в формате 132×80 см.</b>';return}
+  if(!size){$('calcResult').innerHTML='<b>Введите размер в формате 1320×800 мм.</b>';return}
   if(!(price>0) || !Number.isFinite(price)){$('calcResult').innerHTML='<b>Введите цену материала за 1 м².</b>';return}
   const widthM=size.widthCm/100, heightM=size.heightCm/100, area=widthM*heightM, calculated=area*price, materialTotal=Math.max(calculated,price);
   const minApplied=calculated<price;
@@ -1215,7 +1215,7 @@ $('calcBtn').onclick=()=>{
   const grommetPrice=20;
   const grommetTotal=grommets*grommetPrice;
   const total=materialTotal+grommetTotal;
-  $('calcResult').innerHTML=`<div>Размер: <b>${size.widthCm} × ${size.heightCm} см</b> → ${widthM.toFixed(2)} × ${heightM.toFixed(2)} м</div><div>Площадь: <b>${area.toFixed(4)} м²</b></div><div>Расчёт по площади: <b>${money(calculated)}</b></div>${minApplied?`<div class="calc-min">Применена минимальная стоимость заказа: ${money(price)}</div>`:''}${grommetsEnabled?`<div>Люверсы: <b>${grommets} шт.</b> × ${money(grommetPrice)} = <b>${money(grommetTotal)}</b></div>`:''}<div class="calc-total">Стоимость заказа: ${money(total)}</div>`;
+  $('calcResult').innerHTML=`<div>Размер: <b>${mm(size.widthCm)} × ${mm(size.heightCm)} мм</b> → ${widthM.toFixed(2)} × ${heightM.toFixed(2)} м</div><div>Площадь: <b>${area.toFixed(4)} м²</b></div><div>Расчёт по площади: <b>${money(calculated)}</b></div>${minApplied?`<div class="calc-min">Применена минимальная стоимость заказа: ${money(price)}</div>`:''}${grommetsEnabled?`<div>Люверсы: <b>${grommets} шт.</b> × ${money(grommetPrice)} = <b>${money(grommetTotal)}</b></div>`:''}<div class="calc-total">Стоимость заказа: ${money(total)}</div>`;
 };
 $('calcSize').addEventListener('keydown',e=>{if(e.key==='Enter')$('calcBtn').click()});
 
@@ -1264,12 +1264,14 @@ function fallbackShirtCombinationPrice(prints){
     return total+(i===0?full:effectivePrice(p));
   },0);
 }
-function renderShirtPrints(){const box=$('shirtPrints');if(!box)return;const arr=window.shirtPrints||[];box.innerHTML=arr.map((p,i)=>`<div class="block"><div class="block-head"><b>Нанесение ${i+1}</b>${arr.length>1?`<button type="button" class="danger small" onclick="removeShirtPrint(${i})">Удалить</button>`:''}</div><div class="row"><div class="field"><label>Тип нанесения</label><select onchange="shirtPrints[${i}].print=this.value"><option value="dtf" ${p.print==='dtf'?'selected':''}>ДТФ</option><option value="film" ${p.print==='film'?'selected':''}>Плёнка</option></select></div><div class="field"><label>Размер</label><select onchange="shirtPrints[${i}].size=this.value"><option value="1" ${p.size==='1'?'selected':''}>1 — больше 15×21, до 28×38 см</option><option value="0.5" ${p.size==='0.5'?'selected':''}>0,5 — до 15×21 см</option></select></div></div></div>`).join('')}
+function renderShirtPrints(){const box=$('shirtPrints');if(!box)return;const arr=window.shirtPrints||[];box.innerHTML=arr.map((p,i)=>`<div class="block"><div class="block-head"><b>Нанесение ${i+1}</b>${arr.length>1?`<button type="button" class="danger small" onclick="removeShirtPrint(${i})">Удалить</button>`:''}</div><div class="row"><div class="field"><label>Тип нанесения</label><select onchange="shirtPrints[${i}].print=this.value"><option value="dtf" ${p.print==='dtf'?'selected':''}>ДТФ</option><option value="film" ${p.print==='film'?'selected':''}>Плёнка</option></select></div><div class="field"><label>Размер</label><select onchange="shirtPrints[${i}].size=this.value"><option value="1" ${p.size==='1'?'selected':''}>1 — больше 150×210, до 280×380 мм</option><option value="0.5" ${p.size==='0.5'?'selected':''}>0,5 — до 150×210 мм</option></select></div></div></div>`).join('')}
 window.shirtPrints=[{print:'dtf',size:'1'}];
 window.removeShirtPrint=i=>{shirtPrints.splice(i,1);renderShirtPrints()};
 $('addShirtPrint').onclick=()=>{if(shirtPrints.length>=3){alert('Максимум 3 нанесения. Для расчёта 4 и более нанесений обратитесь к администратору.');return}shirtPrints.push({print:'dtf',size:'1'});renderShirtPrints()};
 renderShirtPrints();
 
+function mm(v){return String(Math.round(Number(v)*100)/10).replace('.',',')}
+function parsePairMm(value){const x=parsePair(value);return x?normSheet(x.w/10,x.h/10):null}
 function normSheet(a,b){a=Number(a);b=Number(b);return a<=b?{w:a,h:b}:{w:b,h:a}}
 function parsePair(value){
   const m=String(value||'').trim().replace(/,/g,'.').match(/^(\d+(?:\.\d+)?)\s*(?:x|х|×|\*)\s*(\d+(?:\.\d+)?)/i);
@@ -1345,8 +1347,8 @@ function fitCount(cardW,cardH,sheetW,sheetH){
   // Лист и карточка нормализованы (короткая сторона первая), лист рисуется стоя.
   // a — карточка стоит так же, как лист (вертикально), b — повёрнута (горизонтально).
   return a>=b
-    ?{count:a,orientation:`${cardW} × ${cardH} см`,layout:'вертикально',pieceW:cardW,pieceH:cardH,cols:Math.floor(usableW/cardW),rows:Math.floor(usableH/cardH),usableW,usableH}
-    :{count:b,orientation:`${cardH} × ${cardW} см`,layout:'горизонтально',pieceW:cardH,pieceH:cardW,cols:Math.floor(usableW/cardH),rows:Math.floor(usableH/cardW),usableW,usableH};
+    ?{count:a,orientation:`${mm(cardW)} × ${mm(cardH)} мм`,layout:'вертикально',pieceW:cardW,pieceH:cardH,cols:Math.floor(usableW/cardW),rows:Math.floor(usableH/cardH),usableW,usableH}
+    :{count:b,orientation:`${mm(cardH)} × ${mm(cardW)} мм`,layout:'горизонтально',pieceW:cardH,pieceH:cardW,cols:Math.floor(usableW/cardH),rows:Math.floor(usableH/cardW),usableW,usableH};
 }
 function layoutSvg(sheetW,sheetH,fit){
   // Схема листа: поле 0,5 см, карточки сеткой от левого верхнего угла.
@@ -1362,7 +1364,7 @@ function layoutSvg(sheetW,sheetH,fit){
 }
 $('sheetCalcBtn').onclick=async()=>{
   await loadPriceRules();
-  const card=parsePair($('cardSize').value), sheet=parsePair($('sheetSize').value),
+  const card=parsePairMm($('cardSize').value), sheet=parsePairMm($('sheetSize').value),
        qty=Number($('cardQty').value),
 sides=$('cardSides').value,
 material=$('cardMaterial').value,
@@ -1370,14 +1372,14 @@ lamination=$('sheetLamination').checked,
 laminationSides=$('laminationSides').value,
 laminationMaterial=$('laminationMaterial').value;
   const out=$('sheetCalcResult');
-  if(!card){out.innerHTML='<b>Введите размер карточки, например 5×7.</b>';return}
-  if(!sheet){out.innerHTML='<b>Введите размер листа, например 30×42.</b>';return}
+  if(!card){out.innerHTML='<b>Введите размер карточки в мм, например 50×70.</b>';return}
+  if(!sheet){out.innerHTML='<b>Введите размер листа в мм, например 300×420.</b>';return}
   if(!(qty>0)||!Number.isFinite(qty)){out.innerHTML='<b>Введите количество карточек.</b>';return}
   if(!material){out.innerHTML='<b>Выберите материал.</b>';return}
   if(lamination && !laminationMaterial){out.innerHTML='<b>Выберите материал ламинации.</b>';return}
 
   const fit=fitCount(card.w,card.h,sheet.w,sheet.h);
-  if(!fit){out.innerHTML='<b>Карточка не помещается на лист с учётом поля 0,5 см с каждой стороны.</b>';return}
+  if(!fit){out.innerHTML='<b>Карточка не помещается на лист с учётом поля 5 мм с каждой стороны.</b>';return}
 
   const sheets=Math.ceil(qty/fit.count);
   const pr=priceRuleFor(
@@ -1385,7 +1387,7 @@ laminationMaterial=$('laminationMaterial').value;
     sheet.w,sheet.h,sheets,material
   );
   if(!pr){
-    out.innerHTML=`<b>В базе нет цены для материала «${esc(material)}», листа ${sheet.w}×${sheet.h} см и ${sides==='double'?'двусторонней':'односторонней'} печати.</b><div class="calc-min">Администратору нужно добавить правило печати с этим материалом и нужными ступенями тиража.</div>`;
+    out.innerHTML=`<b>В базе нет цены для материала «${esc(material)}», листа ${mm(sheet.w)}×${mm(sheet.h)} мм и ${sides==='double'?'двусторонней':'односторонней'} печати.</b><div class="calc-min">Администратору нужно добавить правило печати с этим материалом и нужными ступенями тиража.</div>`;
     return;
   }
 
@@ -1407,9 +1409,9 @@ const lamRule=lamination
     )
   :null;  const lamPrice=lamination?priceMode(lamRule,sheets):0;
 
-  if(diff && diffRule===null){out.innerHTML=`<b>Для услуги «Разные картинки» нет цены для листа ${sheet.w}×${sheet.h} см.</b>`;return}
-  if(cutting && cutRule===null){out.innerHTML=`<b>Для услуги «Резка» нет цены для листа ${sheet.w}×${sheet.h} см.</b>`;return}
-  if(lamination && lamRule===null){out.innerHTML=`<b>Для ламинации «${esc(laminationMaterial)}» нет цены для листа ${sheet.w}×${sheet.h} см и ${sheets} листов.</b>`;return}
+  if(diff && diffRule===null){out.innerHTML=`<b>Для услуги «Разные картинки» нет цены для листа ${mm(sheet.w)}×${mm(sheet.h)} мм.</b>`;return}
+  if(cutting && cutRule===null){out.innerHTML=`<b>Для услуги «Резка» нет цены для листа ${mm(sheet.w)}×${mm(sheet.h)} мм.</b>`;return}
+  if(lamination && lamRule===null){out.innerHTML=`<b>Для ламинации «${esc(laminationMaterial)}» нет цены для листа ${mm(sheet.w)}×${mm(sheet.h)} мм и ${sheets} листов.</b>`;return}
 
   const printTotal=sheets*printPrice;
   const diffTotal=sheets*diffPrice;
@@ -1421,9 +1423,9 @@ const lamRule=lamination
   const tierText=`от ${pr.min_sheets} листов`;
 
   out.innerHTML=`<div>Материал: <b>${esc(material)}</b></div>
-  <div>Лист: <b>${sheet.w} × ${sheet.h} см</b> (поле 0,5 см с каждой стороны → рабочая область ${fit.usableW} × ${fit.usableH} см)</div>
+  <div>Лист: <b>${mm(sheet.w)} × ${mm(sheet.h)} мм</b> (поле 5 мм с каждой стороны → рабочая область ${mm(fit.usableW)} × ${mm(fit.usableH)} мм)</div>
   <div>На одном листе: <b>${fit.count} карточек</b>, раскладка <b>${fit.layout}</b> (${fit.cols} × ${fit.rows}, карточка ${fit.orientation})</div>
-  <figure class="layout-fig">${layoutSvg(sheet.w,sheet.h,fit)}<figcaption>Лист ${sheet.w} × ${sheet.h} см, карточки ${fit.layout}</figcaption></figure>
+  <figure class="layout-fig">${layoutSvg(sheet.w,sheet.h,fit)}<figcaption>Лист ${mm(sheet.w)} × ${mm(sheet.h)} мм, карточки ${fit.layout}</figcaption></figure>
   <div>Количество листов: <b>${sheets}</b></div>
   <div>Печать + материал «${esc(material)}»: <b>${money(printPrice)} / лист</b> (${wholesaleUsed?'опт':'розница'}, ${tierText}) → ${money(printTotal)}</div>
   ${diff?`<div>Разные картинки: <b>${money(diffPrice)} / лист</b> (${diffRule&&Number(diffRule.wholesale_price)>0?'опт':'розница'}) → ${money(diffTotal)}</div>`:''}
@@ -1460,7 +1462,7 @@ $('shirtCalcBtn').onclick=async()=>{
       }
     }
     const total=perShirt*qty;
-    out.innerHTML=detail.join('')+`<div>Количество футболок: <b>${qty}</b></div><div class="calc-min">Опт определяется автоматически по количеству футболок. Размер 0,5 — до 15×21 см; размер 1 — больше 15×21 до 28×38 см.</div><div class="calc-total">Итого: ${money(total)}</div>`;
+    out.innerHTML=detail.join('')+`<div>Количество футболок: <b>${qty}</b></div><div class="calc-min">Опт определяется автоматически по количеству футболок. Размер 0,5 — до 150×210 мм; размер 1 — больше 150×210 до 280×380 мм.</div><div class="calc-total">Итого: ${money(total)}</div>`;
   }else{
     if(combo){perShirt=combo.price;detail.push(`<div>Комбинация нанесений: <b>${combo.mode}</b> — ${prints.map(p=>`${SHIRT_PRINTS[p.print]} ${p.size}`).join(' + ')}</div>`);}
     else{
@@ -1497,7 +1499,7 @@ function renderPlotterColors(){
 function renderPlotterItems(){
   const box=$('plotterItems'); if(!box)return;
   const arr=window.plotterItems;
-  box.innerHTML=arr.map((p,i)=>`<div class="block"><div class="block-head"><b>Размер ${i+1}</b>${arr.length>1?`<button type="button" class="danger small" onclick="removePlotterItem(${i})">Удалить</button>`:''}</div><div class="row"><div class="field"><label>Размер, см</label><input value="${esc(p.size)}" placeholder="Например: 10×12" oninput="plotterItems[${i}].size=this.value"></div><div class="field"><label>Количество, шт.</label><input type="number" min="1" step="1" value="${esc(p.qty)}" oninput="plotterItems[${i}].qty=this.value"></div></div></div>`).join('');
+  box.innerHTML=arr.map((p,i)=>`<div class="block"><div class="block-head"><b>Размер ${i+1}</b>${arr.length>1?`<button type="button" class="danger small" onclick="removePlotterItem(${i})">Удалить</button>`:''}</div><div class="row"><div class="field"><label>Размер, мм</label><input value="${esc(p.size)}" placeholder="Например: 100×120" oninput="plotterItems[${i}].size=this.value"></div><div class="field"><label>Количество, шт.</label><input type="number" min="1" step="1" value="${esc(p.qty)}" oninput="plotterItems[${i}].qty=this.value"></div></div></div>`).join('');
 }
 window.removePlotterItem=i=>{plotterItems.splice(i,1);renderPlotterItems()};
 $('addPlotterItem').onclick=()=>{plotterItems.push({size:'',qty:1});renderPlotterItems()};
@@ -1510,21 +1512,21 @@ $('plotterCalcBtn').onclick=async()=>{
   if(!color){out.innerHTML='<b>Выберите цвет плёнки.</b>';return}
   const lines=[];let total=0;
   for(let i=0;i<plotterItems.length;i++){
-    const it=plotterItems[i], size=parsePair(it.size), qty=Math.floor(Number(it.qty));
-    if(!size){out.innerHTML=`<b>Размер ${i+1}: введите размер, например 10×12.</b>`;return}
+    const it=plotterItems[i], size=parsePairMm(it.size), qty=Math.floor(Number(it.qty));
+    if(!size){out.innerHTML=`<b>Размер ${i+1}: введите размер в мм, например 100×120.</b>`;return}
     if(!(qty>=1)){out.innerHTML=`<b>Размер ${i+1}: введите количество.</b>`;return}
     const tier=plotterTierFor(size);
-    if(!tier){out.innerHTML=`<b>Размер ${size.w} × ${size.h} см не помещается в самую большую ступень 28 × 100 см — такой размер считает администратор.</b>`;return}
+    if(!tier){out.innerHTML=`<b>Размер ${mm(size.w)} × ${mm(size.h)} мм не помещается в самую большую ступень 280 × 1000 мм — такой размер считает администратор.</b>`;return}
     const row=plotterPriceRow(color,tier);
-    if(!row){out.innerHTML=`<b>Для цвета «${esc(color)}» нет цены ступени до ${tier.w} × ${tier.l} см.</b><div class="calc-min">Администратору нужно указать её в «Цены листов».</div>`;return}
+    if(!row){out.innerHTML=`<b>Для цвета «${esc(color)}» нет цены ступени до ${mm(tier.w)} × ${mm(tier.l)} мм.</b><div class="calc-min">Администратору нужно указать её в «Цены листов».</div>`;return}
     const piece=Number(row.price), sum=piece*qty;
     total+=sum;
-    lines.push(`<div>${size.w} × ${size.h} см (ступень до ${tier.w} × ${tier.l}): <b>${money(piece)}</b> × ${qty} шт. = <b>${money(sum)}</b></div>`);
+    lines.push(`<div>${mm(size.w)} × ${mm(size.h)} мм (ступень до ${mm(tier.w)} × ${mm(tier.l)}): <b>${money(piece)}</b> × ${qty} шт. = <b>${money(sum)}</b></div>`);
   }
   out.innerHTML=`<div>Плёнка: <b>${esc(color)}</b></div>${lines.join('')}<div class="calc-total">Итого: ${money(total)}</div>`;
 };
 function renderPlotterTierInputs(values={}){
-  $('pfTierInputs').innerHTML=PLOTTER_TIERS.map((t,i)=>`<div class="field"><label>До ${t.w}×${t.l} см, ₽</label><input id="pfTier${i}" type="number" min="0" step="0.01" value="${values[i]??''}"></div>`).join('');
+  $('pfTierInputs').innerHTML=PLOTTER_TIERS.map((t,i)=>`<div class="field"><label>До ${mm(t.w)}×${mm(t.l)} мм, ₽</label><input id="pfTier${i}" type="number" min="0" step="0.01" value="${values[i]??''}"></div>`).join('');
 }
 function renderPlotterPriceRules(){
   const box=$('plotterPriceRows'); if(!box)return;
@@ -1594,7 +1596,7 @@ function renderPriceRules(){
     rows.map(r=>`<tr>
       <td>${r._type==='print'?'Печать':(r._type==='lamination'?'Ламинация':'Услуга')}</td>
       <td>${esc(r.material_name||'—')}</td>
-      <td>${r.sheet_width_cm}×${r.sheet_height_cm}</td>
+      <td>${mm(r.sheet_width_cm)}×${mm(r.sheet_height_cm)} мм</td>
       <td>${r._type==='print'?priceLabelSides(r.sides):(r._type==='lamination'?('Ламинация: '+priceLabelSides(r.sides)):'Услуга: '+serviceLabel(r.service_type))}</td>
       <td>${r.min_sheets}</td>
       <td>${money(r.retail_price)}</td>
@@ -1615,9 +1617,9 @@ window.editPriceRule=(type,id)=>{
   const source=type==='print'?printPriceRules:(type==='lamination'?laminationPriceRules:servicePriceRules);
   const r=source.find(x=>String(x.id)===String(id)); if(!r)return;
   resetPriceEdit(); priceEdit={type,id:String(id)};
-  if(type==='print'){ $('prMaterial').value=r.material_name||''; $('prSheetSize').value=`${r.sheet_width_cm}×${r.sheet_height_cm}`; $('prSides').value=r.sides||'single'; $('prMinSheets').value=r.min_sheets; $('prRetail').value=r.retail_price; $('prWholesale').value=r.wholesale_price||0; $('addPrintRule').textContent='Сохранить изменения'; $('cancelPrintEdit').style.display='inline-block'; }
-  if(type==='lamination'){ $('lrMaterial').value=r.material_name||''; $('lrSheetSize').value=`${r.sheet_width_cm}×${r.sheet_height_cm}`; $('lrSides').value=r.sides||'single'; $('lrMinSheets').value=r.min_sheets; $('lrRetail').value=r.retail_price; $('lrWholesale').value=r.wholesale_price||0; $('addLamRule').textContent='Сохранить изменения'; $('cancelLamEdit').style.display='inline-block'; }
-  if(type==='service'){ $('srSheetSize').value=`${r.sheet_width_cm}×${r.sheet_height_cm}`; $('srService').value=r.service_type; $('srMinSheets').value=r.min_sheets; $('srRetail').value=r.retail_price; $('srWholesale').value=r.wholesale_price||0; $('addServiceRule').textContent='Сохранить изменения'; $('cancelServiceEdit').style.display='inline-block'; }
+  if(type==='print'){ $('prMaterial').value=r.material_name||''; $('prSheetSize').value=`${mm(r.sheet_width_cm)}×${mm(r.sheet_height_cm)}`; $('prSides').value=r.sides||'single'; $('prMinSheets').value=r.min_sheets; $('prRetail').value=r.retail_price; $('prWholesale').value=r.wholesale_price||0; $('addPrintRule').textContent='Сохранить изменения'; $('cancelPrintEdit').style.display='inline-block'; }
+  if(type==='lamination'){ $('lrMaterial').value=r.material_name||''; $('lrSheetSize').value=`${mm(r.sheet_width_cm)}×${mm(r.sheet_height_cm)}`; $('lrSides').value=r.sides||'single'; $('lrMinSheets').value=r.min_sheets; $('lrRetail').value=r.retail_price; $('lrWholesale').value=r.wholesale_price||0; $('addLamRule').textContent='Сохранить изменения'; $('cancelLamEdit').style.display='inline-block'; }
+  if(type==='service'){ $('srSheetSize').value=`${mm(r.sheet_width_cm)}×${mm(r.sheet_height_cm)}`; $('srService').value=r.service_type; $('srMinSheets').value=r.min_sheets; $('srRetail').value=r.retail_price; $('srWholesale').value=r.wholesale_price||0; $('addServiceRule').textContent='Сохранить изменения'; $('cancelServiceEdit').style.display='inline-block'; }
 };
 $('cancelPrintEdit').onclick=()=>{resetPriceEdit();$('prMaterial').value='';$('prSheetSize').value='';$('prMinSheets').value='1';$('prRetail').value='';$('prWholesale').value='';};
 $('cancelLamEdit').onclick=()=>{resetPriceEdit();$('lrMaterial').value='';$('lrSheetSize').value='';$('lrSides').value='single';$('lrMinSheets').value='1';$('lrRetail').value='';$('lrWholesale').value='';};
@@ -1632,7 +1634,7 @@ window.deletePriceRule=async(type,id)=>{
 };
 $('addPrintRule').onclick=async()=>{
   const name=$('prMaterial').value.trim();
-  const sh=parsePair($('prSheetSize').value);
+  const sh=parsePairMm($('prSheetSize').value);
   const min=Number($('prMinSheets').value);
   const retail=Number($('prRetail').value);
   const wholesale=Number($('prWholesale').value);
@@ -1658,7 +1660,7 @@ $('addPrintRule').onclick=async()=>{
 
 $('addLamRule').onclick=async()=>{
   const name=$('lrMaterial').value.trim();
-  const sh=parsePair($('lrSheetSize').value);
+  const sh=parsePairMm($('lrSheetSize').value);
   const min=Number($('lrMinSheets').value);
   const retail=Number($('lrRetail').value);
   const wholesale=Number($('lrWholesale').value);
@@ -1671,7 +1673,7 @@ $('addLamRule').onclick=async()=>{
   resetPriceEdit(); $('priceStatus').textContent='Правило ламинации сохранено.'; await loadPriceRules(); renderPriceRules();
 };
 $('addServiceRule').onclick=async()=>{
-  const sh=parsePair($('srSheetSize').value), min=Number($('srMinSheets').value), retail=Number($('srRetail').value), wholesale=Number($('srWholesale').value);
+  const sh=parsePairMm($('srSheetSize').value), min=Number($('srMinSheets').value), retail=Number($('srRetail').value), wholesale=Number($('srWholesale').value);
   if(!sh||!(min>=1)||$('srRetail').value.trim()===''||retail<0||wholesale<0){$('priceStatus').textContent='Проверьте размер, порог и цены.';return}
   const payload={sheet_width_cm:sh.w,sheet_height_cm:sh.h,service_type:$('srService').value,min_sheets:min,retail_price:retail,wholesale_price:wholesale};
   const r=priceEdit.type==='service' ? await db.from('sheet_service_price_rules').update(payload).eq('id',priceEdit.id) : await db.from('sheet_service_price_rules').insert(payload);
