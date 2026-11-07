@@ -7026,5 +7026,6 @@ $('staffSave').onclick=async()=>{
   setInterval(()=>{if(isAdmin&&!isDev)load().then(()=>{popQueue=rows.filter(u=>u.status==='offered'&&!later(u.id)&&u.id!==popCur?.id);showNext()}).catch(()=>{})},10*60*1000);
 })();
 </script>
+<script src="estimate-pdf.js"></script>
 </body>
 </html>
