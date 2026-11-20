@@ -1,0 +1,100 @@
+{
+  "status": "landing_implemented_registration_blocked_by_inactive_demo_database",
+  "product": "Клаудшоп",
+  "source_repository": "polaroidstav76-cloud/spravochnik-tovarov",
+  "target_repository": "polaroidstav76-cloud/polaroid-demo",
+  "deployment_model": "One hosted SaaS application; isolated companies with owners and staff; current owner and iPrint installations stay separate and unchanged",
+  "protected_existing_projects": [
+    "tmxluzvymwldtxbaiekn",
+    "cvlwoylsdgvwycntyqxu"
+  ],
+  "do_not_use_existing_business_database": true,
+  "changes": [
+    {
+      "action": "exclude",
+      "feature": "Прайс для сотрудников"
+    },
+    {
+      "action": "rename",
+      "from": "Чеки",
+      "to": "Заказы в работе"
+    },
+    {
+      "action": "exclude",
+      "feature": "Учёт включения и выключения ПК, агент и интерфейс"
+    },
+    {
+      "action": "rename",
+      "from": "Цены листов",
+      "to": "Настройки калькулятора"
+    },
+    {
+      "action": "exclude",
+      "feature": "Обновления клиентов; доступны только владельцу в основном Клаудшопе"
+    },
+    {
+      "action": "exclude",
+      "feature": "Кнопка и подключение приёмника 30х40"
+    },
+    {
+      "action": "exclude",
+      "feature": "Кнопка Обновить из настроек"
+    },
+    {
+      "action": "rename_and_move",
+      "from": "Добавить товар",
+      "to": "Добавить справочник",
+      "location": "Справочники: товары и инструкции"
+    },
+    {
+      "action": "exclude",
+      "feature": "Способ оплаты Ссылка; нельзя оставлять его в раздельной оплате или серверных допустимых методах для новых продаж"
+    },
+    {
+      "action": "port_from_iprint",
+      "feature": "Предварительный расчёт и все связанные функции: сохранение, список, изменение, отмена, пробитие и PDF",
+      "no_other_iprint_updates": true
+    }
+  ],
+  "public_entry": [
+    "Лендинг",
+    "Тарифы",
+    "Пробный период 14 дней для любого тарифа",
+    "Регистрация компании",
+    "Вход в существующий аккаунт"
+  ],
+  "future_release_policy": {
+    "shared_changes": "Validated shared product releases update hosted service",
+    "owner_site": "separate and untouched by SaaS implementation",
+    "iprint_customizations": "client-only, excluded from common release catalog"
+  },
+  "pending": [],
+  "not_yet_approved": [
+    "Tariff prices and final limits",
+    "Payment provider and billing integration"
+  ],
+  "required_before_public_signup": [
+    "Tenant authorization enforced server-side for tables/RPC/storage/functions",
+    "Cross-company isolation tests",
+    "New dedicated service database",
+    "No production company data or secrets in tenant templates",
+    "Trial limits enforced server-side",
+    "Safe onboarding without replaying production bootstrap on existing businesses"
+  ],
+  "registration": {
+    "owner": "email_password",
+    "staff": "owner_created_logins"
+  },
+  "trial": {
+    "days": 14,
+    "per_plan_once": true,
+    "switch_preserves_data": true,
+    "does_not_reset_started_clock": true
+  },
+  "expiry": {
+    "workspace": "blocked_including_reports",
+    "retention_days": 90,
+    "delete": "entire_company_all_accounts_and_data",
+    "cancel_deletion_on": "paid_subscription_or_valid_other_plan_trial"
+  }
+}
